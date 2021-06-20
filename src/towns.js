@@ -22,7 +22,7 @@
 
 /**
  * homeworkContainer - это контейнер для всех ваших домашних заданий
- * Если вы создаете новые html-элементы и добавляете их на страницу, то дабавляйте их только в этот контейнер
+ * Если вы создаете новые html-элементы и добавляете их на страницу, то добавляйте их только в этот контейнер
  *
  * @example
  * homeworkContainer.appendChild(...);
@@ -36,6 +36,37 @@ let homeworkContainer = document.querySelector('#homework-container');
  * @return {Promise<Array<{name: string}>>}
  */
 function loadTowns() {
+    return townsPromise = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+        xhr.responseType = 'json'
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status < 400) {
+                loadingBlock.innerHTML = ''
+                filterBlock.style.display = 'inline-block'
+
+                resolve(Object.values(xhr.response).sort((a, b) => {
+                    if (a.name > b.name) {
+                        return 1
+                    }
+
+                    if (a.name < b.name) {
+                        return -1
+                    }
+
+                    return 0
+                }))
+            } else {
+                reject(() => {
+                    throw new Error('Не удалось загрузить города')
+                })
+            }
+        })
+
+        xhr.send()
+    })
 }
 
 /**
@@ -52,16 +83,32 @@ function loadTowns() {
  * @return {boolean}
  */
 function isMatching(full, chunk) {
+    return full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1
 }
 
-let loadingBlock = homeworkContainer.querySelector('#loading-block');
-let filterBlock = homeworkContainer.querySelector('#filter-block');
-let filterInput = homeworkContainer.querySelector('#filter-input');
-let filterResult = homeworkContainer.querySelector('#filter-result');
-let townsPromise;
+let loadingBlock = homeworkContainer.querySelector('#loading-block')
+let filterBlock = homeworkContainer.querySelector('#filter-block')
+let filterInput = homeworkContainer.querySelector('#filter-input')
+let filterResult = homeworkContainer.querySelector('#filter-result')
+let townsPromise
+let cities = []
 
-filterInput.addEventListener('keyup', function() {
-});
+loadTowns()
+    .then(res => {
+        cities = res
+        loadingBlock.style.display = 'none'
+        filterBlock.style.display = 'block'
+    })
+
+filterInput.addEventListener('keyup', function () {
+
+    filterResult.innerHTML = filterInput.value ?
+        cities
+            .filter(item => isMatching(item.name, filterInput.value))
+            .map(item => `${item.name}<br>`)
+            .join('')
+        : ''
+})
 
 export {
     loadTowns,

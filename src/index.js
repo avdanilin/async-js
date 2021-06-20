@@ -23,7 +23,9 @@ function delayPromise(seconds) {
  * @return {Promise<Array<{name: String}>>}
  */
 function loadAndSortTowns() {
-    return new Promise((resolve, reject) => {
+    let townsPromise;
+
+    return townsPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
         xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
@@ -31,19 +33,18 @@ function loadAndSortTowns() {
 
         xhr.addEventListener('load', () => {
             if (xhr.status < 400) {
-                const responseObject = JSON.parse(xhr.response)
 
-                resolve(Object.values(responseObject).sort((a, b) => {
-                        if (a.name > b.name) {
-                            return 1
-                        }
+                resolve((xhr.response).sort((a, b) => {
+                    if (a.name > b.name) {
+                        return 1
+                    }
 
-                        if (a.name < b.name) {
-                            return -1
-                        }
+                    if (a.name < b.name) {
+                        return -1
+                    }
 
-                        return 0
-                    }))
+                    return 0
+                }))
             } else {
                 reject(error => {
                     throw new Error('Ошибка')
