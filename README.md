@@ -1,4 +1,4 @@
-## LoftSchool example project
+## Asynchronous js
 
 ### Доступные команды
 
